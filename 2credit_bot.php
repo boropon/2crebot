@@ -51,46 +51,48 @@
 		switch($dayoftheweek) {
 			case "Mon":
 				$dayoftheweekjap = "月";
-				$daily_message = "「ぽくぽく」「ぎたー」「たいこ」が100円2クレ";
+				$daily_message = "「ぽくぽく」「ぎたー」「たいこ」が100円2クレです。";
 				break;
 			case "Tue":
 				$dayoftheweekjap = "火";
-				$daily_message = "「びーまに」がパセリ料金40%ダウン";
+				$daily_message = "「びーまに」がパセリ料金40%ダウンです。";
 				break;
 			case "Wed":
 				$dayoftheweekjap = "水";
-				$daily_message = "「ゆびーと」がパセリ料金40%ダウン";
+				$daily_message = "「ゆびーと」がパセリ料金40%ダウンです。";
 				break;
 			case "Thu":
 				$dayoftheweekjap = "木";
-				$daily_message = "「りふれくびーと」がパセリ料金40%ダウン";
+				$daily_message = "「りふれくびーと」がパセリ料金40%ダウンです。";
 				break;
 			case "Fri":
 				$dayoftheweekjap = "金";
-				$daily_message = "「ぱかぱか」がパセリ料金40%ダウン";
+				$daily_message = "「ぱかぱか」がパセリ料金40%ダウンです。";
 				break;
 			case "Sat":
 				$dayoftheweekjap = "土";
-				$daily_message = "通常営業日";
+				$daily_message = "通常営業日です。";
 				break;
 			case "Sun":
 				$dayoftheweekjap = "日";
-				$daily_message = "通常営業日";
+				$daily_message = "通常営業日です。";
 				break;
 		}
 		
 		//前日9時に保存した天気を参照し、雪なら雪の日イベント用メッセージに変更
 		$today_weather = file_get_contents($weather_file);
 		if ($today_weather === "雪" || $today_weather === "暴風雪" || preg_match("/^(雪時々).*/", $today_weather)) {
-			$daily_message = "雪の日イベント実施日で、音ゲー全部100円2クレ";
+			$daily_message = "雪の日イベント実施日で、音ゲー全部100円2クレです。";
+		} else if (strstr($today_weather, "雪")) {
+			$daily_message .= "もしかすると雪の日イベント実施日で、音ゲー全部100円2クレかもしれません。";
 		}
 		
-		//ツイートするメッセージの作成（【[今日の月日]】おはようございます☆彡 本日は[音ゲー情報]です。ゆっくりしていってね！[顔文字]）
+		//ツイートするメッセージの作成（【[今日の月日]（[曜日]） [天気]】おはようございます☆彡 本日は[音ゲー情報]です。ゆっくりしていってね！[顔文字]）
 		$today = date('j');
 		$today_month = date('n');
-		$face = array("（ ´Д｀）ｙ━─┛~~", "⊂(ﾟДﾟ⊂⌒｀つ≡≡≡", "（・∀・）", "( ◕ ‿‿ ◕ ) ", "ξ・`∀・)ξ", "(σ´∀`)σ", "(*´･ω･`)ﾉ ", "(｀・ω・´) ゞ", "|・ω・`）", "＼(●)／");
+		$face = array("（ ´Д｀）ｙ━─┛~~", "⊂(ﾟДﾟ⊂⌒｀つ≡≡≡", "（・∀・）", "( ◕ ‿‿ ◕ ) ", "ξ・`∀・)ξ", "(σ´∀`)σ", "(*´･ω･`)ﾉ ", "(｀・ω・´) ゞ", "|・ω・`）", "＼(●)／", "ξ(✿＞◡❛)ξ▄︻");
 		$today_face = $face[mt_rand(0, count($face)-1)];
-		$message = "【".$today_month."月".$today."日（".$dayoftheweekjap."）】 おはようございます☆彡 本日は".$daily_message."です。ゆっくりしていってね！".$today_face;
+		$message = "【".$today_month."月".$today."日（".$dayoftheweekjap."） ".$today_weather."】 おはようございます☆彡 本日は".$daily_message."ゆっくりしていってね！".$today_face;
 		//ツイート
 		tweetmessage($message);
 	}
