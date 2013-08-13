@@ -55,57 +55,6 @@
 ?>
 
 <?php
-	
-	$hour = date('G');
-	//朝8時に今日の音ゲー情報をツイート
-	if($hour == '8') {
-		//今日の曜日を確認し、曜日に対応するツイートメッセージを設定
-		$dayoftheweek = date('D');
-		switch($dayoftheweek) {
-			case "Mon":
-				$dayoftheweekjap = "月";
-				$daily_message = "「ぽくぽく」「ぎたー」「たいこ」が100円2クレです。";
-				break;
-			case "Tue":
-				$dayoftheweekjap = "火";
-				$daily_message = "「びーまに」がパセリ料金40%ダウンです。";
-				break;
-			case "Wed":
-				$dayoftheweekjap = "水";
-				$daily_message = "「ゆびーと」がパセリ料金40%ダウンです。";
-				break;
-			case "Thu":
-				$dayoftheweekjap = "木";
-				$daily_message = "「ふみふみ」「りふれくびーと」がパセリ料金40%ダウンです。";
-				break;
-			case "Fri":
-				$dayoftheweekjap = "金";
-				$daily_message = "「ぱかぱか」がパセリ料金40%ダウンです。";
-				break;
-			case "Sat":
-				$dayoftheweekjap = "土";
-				$daily_message = "通常営業日です。";
-				break;
-			case "Sun":
-				$dayoftheweekjap = "日";
-				$daily_message = "通常営業日です。";
-				break;
-		}
-		
-		//今日の天気を取得
-		$now_time = strtotime("now");
-		$today_weather = getweather($now_time);
-		
-		//ツイートするメッセージの作成（【[今日の月日]（[曜日]） [天気]】おはようございます☆彡 本日は[音ゲー情報]です。ゆっくりしていってね！[顔文字]）
-		$today = date('j');
-		$today_month = date('n');
-		$today_face = getface();
-		$message = "【".$today_month."月".$today."日（".$dayoftheweekjap."） ".$today_weather."】 おはようございます☆彡 本日は".$daily_message."ゆっくりしていってね！".$today_face;
-		
-		//ツイート
-		tweetmessage($message);
-	}
-	
 	//1時間毎にサープラ鳥取店の更新情報を確認、更新があればツイート
 	$blog_info = getbloginfo();
 	if(strcmp($blog_info, "") != 0) {
