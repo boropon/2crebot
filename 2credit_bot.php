@@ -14,6 +14,32 @@
 		return $tomorrow_weather;
 	}
 	
+	//ブログの更新情報をチェックする関数
+	//更新があればブログの情報を取得、更新がなければ空文字列を返却
+	function getbloginfo() {
+		
+		$blog_recordfile = "blog_record.txt";
+		$blog_latest_published = file_get_contents($blog_recordfile);
+		
+		$url = "http://www.3rdplanet.jp/shop/tottori/atom.xml";
+		$xml = simplexml_load_file($url);
+		
+		$blog_information = "";
+		if (strcmp($xml->entry->published, $blog_latest_published) != 0) {
+			$blog_information = $xml->entry->title." ".$xml->entry->link->attributes()->href;
+			
+			$file = fopen($blog_recordfile, "w+");
+			fwrite($file, $xml->entry->published);
+		}
+		return $blog_information;
+	}
+	
+	//顔文字をランダムに取得する
+	function getface() {
+		$face = array("（ ´Д｀）ｙ━─┛~~", "⊂(ﾟДﾟ⊂⌒｀つ≡≡≡", "（・∀・）", "( ◕ ‿‿ ◕ ) ", "ξ・`∀・)ξ", "(σ´∀`)σ", "(*´･ω･`)ﾉ ", "(｀・ω・´) ゞ", "|・ω・`）", "＼(●)／", "ξ(✿＞◡❛)ξ▄︻");
+		return $face[mt_rand(0, count($face)-1)];
+	}
+	
 	//引数に渡した文字列をツイート
 	function tweetmessage($message) {
 		//ツイートするための準備
@@ -29,21 +55,8 @@
 ?>
 
 <?php
-	//天気を保存しておくファイル
-	$weather_file = "weather.txt";
 	
 	$hour = date('G');
-	//朝9時に明日の天気を取得し、ファイルに保存
-	if($hour == '9') {
-		//明日の天気を取得
-		$tomorrow_time = strtotime("tomorrow");
-		$tomorrow_weather = getweather($tomorrow_time);
-		
-		//天気をファイル(weather.txt)に保存
-		$file = fopen($weather_file, "w+");
-		fwrite($file, $tomorrow_weather);
-	}
-	
 	//朝8時に今日の音ゲー情報をツイート
 	if($hour == '8') {
 		//今日の曜日を確認し、曜日に対応するツイートメッセージを設定
@@ -63,7 +76,7 @@
 				break;
 			case "Thu":
 				$dayoftheweekjap = "木";
-				$daily_message = "「りふれくびーと」がパセリ料金40%ダウンです。";
+				$daily_message = "「ふみふみ」「りふれくびーと」がパセリ料金40%ダウンです。";
 				break;
 			case "Fri":
 				$dayoftheweekjap = "金";
@@ -79,21 +92,26 @@
 				break;
 		}
 		
-		//前日9時に保存した天気を参照し、雪なら雪の日イベント用メッセージに変更
-		$today_weather = file_get_contents($weather_file);
-		if ($today_weather === "雪" || $today_weather === "暴風雪" || preg_match("/^(雪時々).*/", $today_weather)) {
-			$daily_message = "雪の日イベント実施日で、音ゲー全部100円2クレです。";
-		} else if (strstr($today_weather, "雪")) {
-			$daily_message .= "もしかすると雪の日イベント実施日で、音ゲー全部100円2クレかもしれません。";
-		}
+		//今日の天気を取得
+		$now_time = strtotime("now");
+		$today_weather = getweather($now_time);
 		
 		//ツイートするメッセージの作成（【[今日の月日]（[曜日]） [天気]】おはようございます☆彡 本日は[音ゲー情報]です。ゆっくりしていってね！[顔文字]）
 		$today = date('j');
 		$today_month = date('n');
-		$face = array("（ ´Д｀）ｙ━─┛~~", "⊂(ﾟДﾟ⊂⌒｀つ≡≡≡", "（・∀・）", "( ◕ ‿‿ ◕ ) ", "ξ・`∀・)ξ", "(σ´∀`)σ", "(*´･ω･`)ﾉ ", "(｀・ω・´) ゞ", "|・ω・`）", "＼(●)／", "ξ(✿＞◡❛)ξ▄︻");
-		$today_face = $face[mt_rand(0, count($face)-1)];
+		$today_face = getface();
 		$message = "【".$today_month."月".$today."日（".$dayoftheweekjap."） ".$today_weather."】 おはようございます☆彡 本日は".$daily_message."ゆっくりしていってね！".$today_face;
+		
 		//ツイート
+		tweetmessage($message);
+	}
+	
+	//1時間毎にサープラ鳥取店の更新情報を確認、更新があればツイート
+	$blog_info = getbloginfo();
+	if(strcmp($blog_info, "") != 0) {
+		$face = getface();
+		$message = "ブログの更新がありました☆彡 ".$face."　⇒　".$blog_info;
+		print $message;
 		tweetmessage($message);
 	}
 ?>
